@@ -13,27 +13,40 @@ from constants import (
 
 def temp_startup():
     from generators import entity_factories
-    foo = entity_factories.human
-    bar = getattr(foo, 'stats')
-    print(getattr(foo, 'stats'))
-    print(bar.agility)
-    print(foo.name)
+    import copy
+    from engine import Engine
+    from game_map import GameMap
+    from input_handlers import MainGameEventHandler
+    player = copy.deepcopy(entity_factories.human)
+    engine = Engine(player)
 
+    engine.game_map = GameMap(engine, CONSOLE_WIDTH, CONSOLE_HEIGHT)
+    engine.player.place(15, 15, engine.game_map)
 
+    return MainGameEventHandler(engine)
 
 def main():
     TILESET = tcod.tileset.load_tilesheet(path=TILESET_PATH, columns=TILESET_COL, rows=TILESET_ROW, charmap=tcod.tileset.CHARMAP_CP437)
 
-    temp_startup()
+    handler = temp_startup()
 
     with tcod.context.new_terminal(
         CONSOLE_WIDTH,
         CONSOLE_HEIGHT,
         tileset=TILESET,
         title='TEMP FUNNY NAME HERE',
+        # sdl_window_flags=tcod.context.SDL_WINDOW_MAXIMIZED,
         vsync=True,
     ) as context:
         console = tcod.Console(CONSOLE_WIDTH, CONSOLE_HEIGHT, order='F')
+
+        while True:
+            console.clear()
+            handler.on_render(console=console)
+            context.present(console)
+            for event in tcod.event.wait():
+                context.convert_event(event)
+                handler = handler.handle_events(event)
 
 
 if __name__ == '__main__':

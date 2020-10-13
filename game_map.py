@@ -5,6 +5,9 @@ from typing import Iterable, Iterator, Optional, TYPE_CHECKING
 import numpy as np
 from tcod.console import Console
 
+# TODO TEMP
+from components.tile_types import floor
+
 if TYPE_CHECKING:
     from engine import Engine
     from entity import Entity, Actor, Item
@@ -24,7 +27,8 @@ class GameMap:
 
         self.entities = set(entities)
 
-        self.tiles = np.full((width, height), fill_value=None, order='F')
+        self.tiles = np.full((width, height), fill_value=floor, order='F')  # TODO TEMP
+        # self.tiles = np.full((width, height), fill_value=None, order='F')
 
     @property
     def gamemap(self) -> GameMap:
@@ -66,4 +70,8 @@ class GameMap:
         return 0 <= x <= self.width and 0 <= y <= self.height
 
     def render(self, console: Console) -> None:
-        console.tiles_rgb[0 : self.width, 0 : self.height] = self.tiles
+        console.tiles_rgb[0:self.width, 0:self.height] = self.tiles['light']
+
+        entities_sorted = sorted(self.entities, key=lambda x: x.render_order.value)
+        for entity in entities_sorted:
+            console.print(x=entity.x, y=entity.y, string=entity.char, fg=entity.color)

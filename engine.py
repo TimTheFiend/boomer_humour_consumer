@@ -16,8 +16,7 @@ if TYPE_CHECKING:
 class Engine:
     game_map: GameMap
 
-    # def __init__(self, player: Actor):
-    def __init__(self, player: str):
+    def __init__(self, player: Actor):
         self.player = player
 
     def handle_enemy_turns(self) -> None:

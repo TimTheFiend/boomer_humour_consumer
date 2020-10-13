@@ -74,6 +74,7 @@ class Entity:
     def move(self, x: int, y: int) -> None:
         self.x += x
         self.y += y
+        print(self.x, self.y)
 
 
 class Actor(Entity):

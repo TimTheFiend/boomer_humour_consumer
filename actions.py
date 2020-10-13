@@ -20,6 +20,7 @@ class Action:
         raise NotImplementedError()
 
 class ActionWithDirection(Action):
+    """Pre-movement action."""
     def __init__(self, entity: Actor, x: int, y: int) -> None:
         super().__init__(entity)
         self.x = x
@@ -41,6 +42,14 @@ class ActionWithDirection(Action):
         raise not NotImplementedError()
 
 
+class BumpAction(ActionWithDirection):
+    def perform(self) -> None:
+        if self.target_actor:
+            return None
+        else:
+            return MovementAction(self.entity, self.x, self.y).perform()
+
+
 class MovementAction(ActionWithDirection):
     def perform(self):
         dest_x, dest_y = self.dest_xy
@@ -53,6 +62,8 @@ class MovementAction(ActionWithDirection):
 
         if self.engine.game_map.get_blocking_entity_at_location(dest_x, dest_y):
             raise NotImplementedError() # Destination blocked by entity
+
+        self.entity.move(self.x, self.y)
 
 class MeleeAction(ActionWithDirection):
     pass
