@@ -1,0 +1,19 @@
+{
+    "human": {
+        "name": {
+            "singular": "human",
+            "plural": "humans"
+        },
+        "char": "H",
+        "color": [255, 255, 255],
+        "stats": {
+            "agility": 5,
+            "charisma": 5,
+            "constitution": 5,
+            "intelligence": 5,
+            "perception": 5,
+            "strength": 5,
+            "wisdom": 5
+        }
+    }
+}
