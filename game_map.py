@@ -88,47 +88,57 @@ class GameMap:
             console.print(x=entity.x, y=entity.y, string=entity.char, fg=entity.color)
 
     def render_center(self, console: Console, player_pos: Tuple[int, int]) -> None:
+        """Render functions which follows the player.
+
+        The player will always be at the center, except at the edges of the map.
+
+        x_pos and y_pos is used to adjust for printing entities on console.
+
+        args:
+        player_pos = player position on the game map (x, y)
+        """
         x, y = player_pos
-        x1 = x2 = y1 = y2 = 0
+        left_render = right_render = top_render = bottom_render = 0
         HALF_WIDTH = int(CONSOLE_WIDTH / 2)
         HALF_HEIGHT = int(CONSOLE_HEIGHT / 2)
 
-        player_x = 0
-        player_y = 0
-
-        # player_y = 0
+        x_pos = 0
+        y_pos = 0
 
         if 0 <= x <= HALF_WIDTH:
-            x1 = 0  # The player is close to the left-most wall
-            x2 = CONSOLE_WIDTH  # The player is close to the left-most wall
+            # If the player is at the left-most wall
+            left_render = 0  
+            right_render = CONSOLE_WIDTH  
         elif (self.width - HALF_WIDTH) <= x <= self.width:
-            x1 = self.width - CONSOLE_WIDTH  # The player is close to the rightmost wall
-            x2 = self.width
-            player_x = self.width - CONSOLE_WIDTH
+            # If the player is at the right-most wall
+            left_render = self.width - CONSOLE_WIDTH  
+            right_render = self.width
+            x_pos = self.width - CONSOLE_WIDTH
         else:
-            x1 = x - HALF_WIDTH
-            x2 = x + HALF_WIDTH
-            player_x = x - HALF_WIDTH
-
-            # player_y = max(0, y - (y - HALF_HEIGHT))
-            # player_x = x - HALF_WIDTH
+            # If the player is in between values above
+            left_render = x - HALF_WIDTH
+            right_render = x + HALF_WIDTH
+            x_pos = x - HALF_WIDTH
 
         if 0 <= y <= HALF_HEIGHT:
-            y1 = 0  # The player is close to the left-most wall
-            y2 = CONSOLE_HEIGHT  # The player is close to the left-most wall
+            # If the player is at the top wall
+            top_render = 0  
+            bottom_render = CONSOLE_HEIGHT  
         elif (self.height - HALF_HEIGHT) <= y <= self.height:
-            y1 = self.height - CONSOLE_HEIGHT  # The player is close to the rightmost wall
-            y2 = self.height
-            player_y = self.height - CONSOLE_HEIGHT
+            # If the player is at the bottom wall
+            top_render = self.height - CONSOLE_HEIGHT  
+            bottom_render = self.height
+            y_pos = self.height - CONSOLE_HEIGHT
         else:
-            y1 = y - HALF_HEIGHT
-            y2 = y + HALF_HEIGHT
-            player_y = y - HALF_HEIGHT
+            # If the player is in between the values above
+            top_render = y - HALF_HEIGHT
+            bottom_render = y + HALF_HEIGHT
+            y_pos = y - HALF_HEIGHT
 
-        console.tiles_rgb[0:self.width, 0:self.height] = self.tiles['light'][x1:x2, y1:y2]
+        console.tiles_rgb[0:self.width, 0:self.height] = self.tiles['light'][left_render:right_render, top_render:bottom_render]
 
 
         entities_sorted = sorted(self.entities, key=lambda _x: _x.render_order.value)
         for entity in entities_sorted:
-            console.print(x=entity.x - player_x, y=entity.y - player_y, string=entity.char, fg=(255, 0, 0))
+            console.print(x=entity.x - x_pos, y=entity.y - y_pos, string=entity.char, fg=(255, 0, 0))
             # console.print(x=entity.x - player_x, y=entity.y - player_y, string=entity.char, fg=entity.color)
