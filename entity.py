@@ -74,7 +74,7 @@ class Entity:
     def move(self, x: int, y: int) -> None:
         self.x += x
         self.y += y
-        print(self.x, self.y)
+
 
 
 class Actor(Entity):
@@ -116,6 +116,10 @@ class Actor(Entity):
         self.level = level
         self.level.parent = self
         # TODO
+
+    @property
+    def is_alive(self) -> bool:
+        return bool(self.ai)
 
 class Item(Entity):
     pass

@@ -9,10 +9,8 @@ from components.inventory import Inventory
 from components.stats import Stats
 
 
-
-
 RACES: None
-print('hello')
+
 try:
     with open('res/races.json') as f:
         RACES = json_load(f)

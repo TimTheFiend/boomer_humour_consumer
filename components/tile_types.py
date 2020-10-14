@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Tuple
 
 import numpy as np
@@ -42,6 +44,20 @@ floor = new_tile(
         ord('='),
         (255,255,255),
         (200, 180, 50)
+    ),
+)
+temp = new_tile(
+    walkable=True,
+    transparent=True,
+    dark=(
+        ord('@'),
+        (255, 255, 255),
+        (50, 50, 150)
+    ),
+    light=(
+        ord('@'),
+        (255,255,255),
+        (155, 155, 155)
     ),
 )
 

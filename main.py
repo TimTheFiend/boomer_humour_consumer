@@ -8,6 +8,9 @@ from constants import (
     TILESET_PATH,
     TILESET_ROW,
     TILESET_COL,
+    # TEMP
+    DUNGEON_HEIGHT,
+    DUNGEON_WIDTH,
 )
 
 
@@ -20,8 +23,10 @@ def temp_startup():
     player = copy.deepcopy(entity_factories.human)
     engine = Engine(player)
 
-    engine.game_map = GameMap(engine, CONSOLE_WIDTH, CONSOLE_HEIGHT)
-    engine.player.place(15, 15, engine.game_map)
+    engine.game_map = GameMap(engine, DUNGEON_WIDTH, DUNGEON_HEIGHT)
+    # engine.game_map = GameMap(engine, DUNGEON_WIDTH, DUNGEON_HEIGHT)
+    # engine.game_map = GameMap(engine, CONSOLE_WIDTH, CONSOLE_HEIGHT)
+    engine.player.place(100, 100, engine.game_map)
 
     return MainGameEventHandler(engine)
 

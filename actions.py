@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Optional, Tuple, TYPE_CHECKING
 
+from exceptions import Impossible
+
 if TYPE_CHECKING:
     from engine import Engine
     from entity import Actor, Entity, Item
@@ -28,7 +30,7 @@ class ActionWithDirection(Action):
 
     @property
     def destination(self) -> Tuple[int, int]:
-        self.entity.x + self.x, self.entity.y + self.y
+        return self.entity.x + self.x, self.entity.y + self.y
 
     @property
     def blocking_entity(self) -> Optional[Actor]:
@@ -52,10 +54,10 @@ class BumpAction(ActionWithDirection):
 
 class MovementAction(ActionWithDirection):
     def perform(self):
-        dest_x, dest_y = self.dest_xy
+        dest_x, dest_y = self.destination
 
         if not self.engine.game_map.in_bounds(dest_x, dest_y):
-            raise NotImplementedError() # Destination out of bounds
+            raise Impossible # Destination out of bounds
 
         if not self.engine.game_map.tiles["walkable"][dest_x, dest_y]:
             raise NotImplementedError() # Destination blocked by tile

@@ -6,7 +6,7 @@ import tcod.event
 
 from actions import *
 
-
+from exceptions import Impossible
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -85,13 +85,17 @@ class EventHandler(BaseEventHandler):
     def handle_action(self, action: Optional[Action]) -> bool:
         if action is None:
             return False
-        action.perform()
+        try:
+            action.perform()
+        except Impossible as exc:
+            # TODO
+            return False
         return True
         # todo
 
-    def ev_mousemotion(self, event) -> None:
-        #todo
-        pass
+    def ev_mousemotion(self, event: tcod.event.MouseMotion) -> None:
+        if self.engine.game_map.in_bounds(event.tile.x, event.tile.y):
+            self.engine.mouse_position = event.tile.x, event.tile.y
 
     def on_render(self, console: tcod.Console) -> None:
         self.engine.render(console)
@@ -106,6 +110,8 @@ class MainGameEventHandler(EventHandler):
 
         if key == tcod.event.K_SPACE:
             print('AAAAAAAAAAAAAAAAAAAAAAAA')
+        if key == tcod.event.K_ESCAPE:
+            raise SystemExit(0)
         if key in MOVE_KEYS:
             dx, dy = MOVE_KEYS[key]
             return BumpAction(player, dx, dy)

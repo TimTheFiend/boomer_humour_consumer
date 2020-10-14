@@ -1,5 +1,3 @@
-"""Less wordy than `character_stats.py`. Name based on DnD."""
-
 from __future__ import annotations
 
 from typing import Dict, TYPE_CHECKING
