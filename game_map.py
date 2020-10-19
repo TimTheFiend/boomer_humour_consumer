@@ -4,12 +4,13 @@ from typing import Iterable, Iterator, Optional, Tuple, TYPE_CHECKING
 import random
 import numpy as np
 from tcod.console import Console
+from bearlibterminal import terminal
 
 # TODO TEMP
 from components.tile_types import floor, temp
 from constants import (
-    CONSOLE_WIDTH,
-    CONSOLE_HEIGHT,
+    CSNL_WIDTH,
+    CSNL_HEIGHT,
 )
 
 
@@ -86,6 +87,24 @@ class GameMap:
         entities_sorted = sorted(self.entities, key=lambda x: x.render_order.value)
         for entity in entities_sorted:
             console.print(x=entity.x, y=entity.y, string=entity.char, fg=entity.color)
+
+    def render_blt(self, blt: terminal):
+        """The alternative way of printing tiles with BLT.
+        Considering the way it's printed, we need to specifically point to the unicode value of the current tile, hence the [0]
+        """
+        from rendering import draw_character_stats_box
+        from constants import (
+            CSNL_PLAY_AREA_WIDTH,
+            CSNL_HEIGHT,
+        )
+        blt.clear_area(0, 0, CSNL_PLAY_AREA_WIDTH, CSNL_HEIGHT)
+
+        for x in range(CSNL_PLAY_AREA_WIDTH):
+            for y in range(CSNL_HEIGHT):
+                blt.put(x, y, 0xE000 + int(self.tiles[x, y]['light'][0]))
+        blt.clear_area(0, 0, CSNL_PLAY_AREA_WIDTH, CSNL_HEIGHT)
+        draw_character_stats_box(blt)
+
 
     def render_center(self, console: Console, player_pos: Tuple[int, int]) -> None:
         """Render functions which follows the player.

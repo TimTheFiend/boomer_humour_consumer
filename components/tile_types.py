@@ -36,12 +36,12 @@ floor = new_tile(
     walkable=True,
     transparent=True,
     dark=(
-        ord('='),
+        ord('\x91'),
         (255, 255, 255),
         (50, 50, 150)
     ),
     light=(
-        ord('='),
+        ord('\x91'),
         (255,255,255),
         (200, 180, 50)
     ),
@@ -50,12 +50,12 @@ temp = new_tile(
     walkable=True,
     transparent=True,
     dark=(
-        ord('@'),
+        ord('\x85'),
         (255, 255, 255),
         (50, 50, 150)
     ),
     light=(
-        ord('@'),
+        ord('\x85'),
         (255,255,255),
         (155, 155, 155)
     ),

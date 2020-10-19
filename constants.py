@@ -1,6 +1,15 @@
-# Console settings
-CONSOLE_WIDTH = 80
-CONSOLE_HEIGHT = 60
+## Console settings
+# Width
+CSNL_WIDTH = 100
+CSNL_PLAY_AREA_WIDTH = 65
+CSNL_CHARACTER_STATS_WIDTH = CSNL_WIDTH - CSNL_PLAY_AREA_WIDTH
+# Height
+CSNL_HEIGHT = 50
+CSNL_CHARACTER_STATS_HEIGHT = 15
+
+# Tilesets
+TILE_INFO = 0x1000
+
 
 # Dungeon settings
 DUNGEON_WIDTH = 200
@@ -13,3 +22,4 @@ TILESET_ROW = 16
 
 # components/abilities.py
 BASE_HP = 20
+
