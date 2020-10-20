@@ -11,6 +11,7 @@ from components.tile_types import floor, temp
 from constants import (
     CSNL_WIDTH,
     CSNL_HEIGHT,
+    CSNL_PLAY_AREA_WIDTH,
 )
 
 
@@ -62,6 +63,11 @@ class GameMap:
             if isinstance(entity, Item) and entity.is_alive
         )
 
+    def get_play_area(self, x: int, y: int):
+        width = int(CSNL_PLAY_AREA_WIDTH / 2)
+        height = int(CSNL_HEIGHT / 2)
+        return slice(x - width, x + width), slice(y - height, y + height)
+
     def get_blocking_entity_at_location(self, x: int, y: int) -> Optional[Entity]:
         for entity in self.entities:
             if (
@@ -93,16 +99,19 @@ class GameMap:
         Considering the way it's printed, we need to specifically point to the unicode value of the current tile, hence the [0]
         """
         from rendering import draw_character_stats_box
-        from constants import (
-            CSNL_PLAY_AREA_WIDTH,
-            CSNL_HEIGHT,
-        )
+        ## CLEAN UP
+        
         blt.clear_area(0, 0, CSNL_PLAY_AREA_WIDTH, CSNL_HEIGHT)
+        map_render = self.get_play_area(40, 50)
 
         for x in range(CSNL_PLAY_AREA_WIDTH):
             for y in range(CSNL_HEIGHT):
                 blt.put(x, y, 0xE000 + int(self.tiles[x, y]['light'][0]))
-        blt.clear_area(0, 0, CSNL_PLAY_AREA_WIDTH, CSNL_HEIGHT)
+
+        entities_sorted = sorted(self.entities, key=lambda x: x.render_order.value)
+        for entity in entities_sorted:
+            blt.put_ext(entity.x, entity.y, 0xE000 + 2)
+
         draw_character_stats_box(blt)
 
 
@@ -118,8 +127,8 @@ class GameMap:
         """
         x, y = player_pos
         left_render = right_render = top_render = bottom_render = 0
-        HALF_WIDTH = int(CONSOLE_WIDTH / 2)
-        HALF_HEIGHT = int(CONSOLE_HEIGHT / 2)
+        HALF_WIDTH = int(CSNL_WIDTH / 2)
+        HALF_HEIGHT = int(CSNL_HEIGHT / 2)
 
         x_pos = 0
         y_pos = 0
@@ -127,12 +136,12 @@ class GameMap:
         if 0 <= x <= HALF_WIDTH:
             # If the player is at the left-most wall
             left_render = 0  
-            right_render = CONSOLE_WIDTH  
+            right_render = CSNL_WIDTH  
         elif (self.width - HALF_WIDTH) <= x <= self.width:
             # If the player is at the right-most wall
-            left_render = self.width - CONSOLE_WIDTH  
+            left_render = self.width - CSNL_WIDTH  
             right_render = self.width
-            x_pos = self.width - CONSOLE_WIDTH
+            x_pos = self.width - CSNL_WIDTH
         else:
             # If the player is in between values above
             left_render = x - HALF_WIDTH
@@ -142,12 +151,12 @@ class GameMap:
         if 0 <= y <= HALF_HEIGHT:
             # If the player is at the top wall
             top_render = 0  
-            bottom_render = CONSOLE_HEIGHT  
+            bottom_render = CSNL_HEIGHT  
         elif (self.height - HALF_HEIGHT) <= y <= self.height:
             # If the player is at the bottom wall
-            top_render = self.height - CONSOLE_HEIGHT  
+            top_render = self.height - CSNL_HEIGHT  
             bottom_render = self.height
-            y_pos = self.height - CONSOLE_HEIGHT
+            y_pos = self.height - CSNL_HEIGHT
         else:
             # If the player is in between the values above
             top_render = y - HALF_HEIGHT

@@ -8,6 +8,10 @@ from constants import (
     CSNL_CHARACTER_STATS_WIDTH as box_width,
     CSNL_CHARACTER_STATS_HEIGHT as box_height,
 )
+## VERY TEMP
+from tileset_quick_access import Tileset
+
+
 
 X_POS = total_width - box_width + 1
 
@@ -27,9 +31,10 @@ def draw_player_info(blt: terminal):
     LVL_TEMP = 4
     XP_TEMP = 224
     XP_TO_LVL_TEMP = 350
-
+    ## Cleaning up
     blt.clear_area(X_POS, 1, left_side_width, box_height - 1)
-    # Level
+    
+    ## Level
     blt.print(X_POS, 1, f'Level:{str(LVL_TEMP).ljust(3)}')
     ## Bar length is calculated
     bar_width_hp = int(float(CURRENT_HP) / MAX_HP * left_side_width)
@@ -56,34 +61,38 @@ def draw_character_stats_box(blt: terminal):
     Only needs to be called once.
     """
     from constants import TILE_INFO
+    ## STILL VERY TEMP
+    tileset = Tileset(TILE_INFO)
+
+
     starting_point_x = total_width - box_width
     character_box_width = total_width - starting_point_x
 
     ## Top box divided
     for i in range(box_height):
-        blt.put(starting_point_x + int(character_box_width / 2), i, TILE_INFO + 186)
+        blt.put(starting_point_x + int(character_box_width / 2), i, tileset[186])
 
     ## Vertical box drawn
     for i in range(total_height):
-        blt.put(starting_point_x, i, TILE_INFO + 186)
-        blt.put(total_width - 1, i, TILE_INFO + 186)
+        blt.put(starting_point_x, i, tileset[186])
+        blt.put(total_width - 1, i, tileset[186])
 
     ## Horizontal box drawn
     for X_POS in range(starting_point_x, 100):
-        blt.put(X_POS, 0, TILE_INFO + 205)
-        blt.put(X_POS, box_height, TILE_INFO + 205)
-        blt.put(X_POS, total_height - 1, TILE_INFO + 205)
+        blt.put(X_POS, 0, tileset[205])
+        blt.put(X_POS, box_height, tileset[205])
+        blt.put(X_POS, total_height - 1, tileset[205])
 
     ## Connecting vertical and horizontal
-    blt.put(starting_point_x,   0,                  TILE_INFO + 201)  # Top right connector
-    blt.put(starting_point_x,   box_height,         TILE_INFO + 204)  # Mid right connector
-    blt.put(starting_point_x,   total_height - 1,   TILE_INFO + 200)  # Bot right connector
-    blt.put(total_width - 1,    0,                  TILE_INFO + 184)  # Top left connector
-    blt.put(total_width - 1,    box_height,         TILE_INFO + 185)  # Mid left connector
-    blt.put(total_width - 1,    total_height - 1,   TILE_INFO + 188)  # Bot left connector
+    blt.put(starting_point_x,   0,                  tileset[201])  # Top right connector
+    blt.put(starting_point_x,   box_height,         tileset[204])  # Mid right connector
+    blt.put(starting_point_x,   total_height - 1,   tileset[200])  # Bot right connector
+    blt.put(total_width - 1,    0,                  tileset[184])  # Top left connector
+    blt.put(total_width - 1,    box_height,         tileset[185])  # Mid left connector
+    blt.put(total_width - 1,    total_height - 1,   tileset[188])  # Bot left connector
 
-    # Connecting vertical and horizontal in mid top 
-    blt.put(starting_point_x + int(character_box_width / 2), 15, TILE_INFO + 202)
+
+    blt.put(starting_point_x + int(character_box_width / 2), box_height, tileset[202])
 
     blt.print(starting_point_x, 0, "Player Name Goes Here", width=character_box_width, height=1, align=blt.TK_ALIGN_CENTER)
     draw_player_info(blt)
