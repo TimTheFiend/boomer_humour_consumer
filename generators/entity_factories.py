@@ -30,3 +30,13 @@ human = Actor(
     level=Level(), # TODO
     inventory=Inventory()
 )
+
+player = Actor(
+    char=RACES['human']['char'],
+    color=RACES['human']['color'],
+    name=str(RACES['human']['name']['singular'].capitalize()),
+    ai_cls=HostileEnemy,
+    stats=Stats(stats=RACES['human']['stats']),
+    level=Level(), # TODO
+    inventory=Inventory()
+)

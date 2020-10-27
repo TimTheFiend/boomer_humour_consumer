@@ -60,10 +60,10 @@ class MovementAction(ActionWithDirection):
             raise Impossible # Destination out of bounds
 
         if not self.engine.game_map.tiles["walkable"][dest_x, dest_y]:
-            raise NotImplementedError() # Destination blocked by tile
+            raise Impossible # Destination blocked by wall
 
         if self.engine.game_map.get_blocking_entity_at_location(dest_x, dest_y):
-            raise NotImplementedError() # Destination blocked by entity
+            raise Impossible # Destination blocked by entity
 
         self.entity.move(self.x, self.y)
 

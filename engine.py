@@ -31,12 +31,19 @@ class Engine:
                     pass
 
     def update_fov(self) -> None:
-        raise NotImplementedError()
-
+        """Recompute the visible area based on the players point of view."""
+        self.game_map.visible[:] = compute_fov(
+            self.game_map.tiles["transparent"],
+            (self.player.x, self.player.y),
+            radius=20,
+        )
+        # If a tile is "visible" it should be added to "explored".
+        self.game_map.explored |= self.game_map.visible
+        
     def render(self, console: Console) -> None:
-        # self.game_map.render(console)
         self.game_map.render_center(console, (self.player.x, self.player.y))
         self.DEV_DEBUG()
+        # self.DEV_DEBUG()
 
 
 
@@ -45,6 +52,6 @@ class Engine:
         position_string = f'X: {str(self.player.x).rjust(4)} Y: {str(self.player.y).rjust(4)}'
 
 
-        print(position_string, end='')
-        print('\b' * len(position_string), end='', flush=True)
-        print('\b' * len(position_string), end='', flush=True)
+        # print(position_string, end='')
+        # print('\b' * len(position_string), end='', flush=True)
+        # print('\b' * len(position_string), end='', flush=True)

@@ -3,8 +3,8 @@ CONSOLE_WIDTH = 80
 CONSOLE_HEIGHT = 60
 
 # Dungeon settings
-DUNGEON_WIDTH = 200
-DUNGEON_HEIGHT = 200
+DUNGEON_WIDTH = 500
+DUNGEON_HEIGHT = 500
 
 # Tileset
 TILESET_PATH = 'data/graphics/default16x16.png'
