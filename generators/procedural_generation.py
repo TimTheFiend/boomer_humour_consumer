@@ -150,27 +150,16 @@ def generate_forest(
 
     player.place(25, 25, dungeon)
 
-
-    x = random.randint(0, map_width -1)
-    y = random.randint(0, map_height -1)
-
-    new_tree = Tree(x, y)
-
     for x in range(map_width):
         for y in range(map_height):
             if random.randint(0, 100) < tree_chance:
+                new_tree = Tree(x, y)
                 dungeon.tiles[x, y] = random.choice((tile_types.tree1, tile_types.tree2))
 
-            if random.randint(0, 100) < 25:
+            if random.randint(0, 100) < int(tree_chance / 4):
                 dungeon.tiles[x, y] = tile_types.leaves    
 
     # ville gøre dette til en funktion men jeg er for dum til at få det til at virke
-
-
-
-
-
-    # y = 0
 
     noisemap = tcod.noise.Noise(
         dimensions=2,
@@ -192,7 +181,8 @@ def generate_forest(
     hm_height = noisemap.sample_ogrid(ogrid)
     tcod.heightmap_normalize(hm_height, 0.0, 1.0)
 
-    max_rivers = random.randint(3, 5)
+    max_rivers = random.randint(4, 6)
+    max_roads = 5
     print(max_rivers)
 
     for rivers in range(max_rivers):
@@ -233,12 +223,69 @@ def generate_forest(
         pathfinder = tcod.path.Pathfinder(graph)
         pathfinder.add_root((0, random.randint(0, map_height -1)))
 
+        # path = pathfinder.path_to((map_width -1, random.randint(0, map_height -1)))[:].tolist()
         path = pathfinder.path_to((map_width -1, random.randint(0, map_height -1)))[:].tolist()
-        print(path)
         for i, j in path:
-            if dungeon.tiles[i, j] == tile_types.shallow_water:
+            if dungeon.tiles[i, j] == tile_types.shallow_water or dungeon.tiles[i, j] == tile_types.deep_water:
                 break
             dungeon.tiles[i, j] = tile_types.shallow_water
+
+    # TODO
+    # roads
+    # samme pathfinding som når man laver en flod, men på et tidspunkt skal tile_type tjekkes, hvis tile_type er en anden road, koster det færre point at lave en road
+
+    for roads in range(max_roads):
+        temp_cost = []
+        for x in range(map_width):
+            temp_row = []
+            for y in range(map_height):
+                tile = hm_height[x, y]
+                value = 0
+                if 0.0 <= tile <= 0.1:
+                    value = 2
+                if 0.1 <= tile <= 0.2:
+                    value = 3
+                if 0.2 <= tile <= 0.3:
+                    value = 4
+                if 0.3 <= tile <= 0.4:
+                    value = 5
+                if 0.4 <= tile <= 0.5:
+                    value = 6
+                if 0.5 <= tile <= 0.6:
+                    value = 7   
+                if 0.6 <= tile <= 0.7:
+                    value = 8
+                if 0.7 <= tile <= 0.8:
+                    value = 9
+                if 0.8 <= tile <= 0.9:
+                    value = 10
+                if 0.9 <= tile <= 1.0:
+                    value = 11
+
+                if dungeon.tiles[x, y] == tile_types.road:
+                    value = 1
+
+                if dungeon.tiles[x, y] == tile_types.shallow_water or dungeon.tiles[x, y] == tile_types.deep_water:
+                    value = 15
+
+                temp_row.append(value)
+            temp_cost.append(temp_row)
+
+        cost = np.array(temp_cost, dtype=np.int8, order='F')
+        graph = tcod.path.SimpleGraph(cost=cost, cardinal=2, diagonal=10,)
+        
+        pathfinder = tcod.path.Pathfinder(graph)
+        pathfinder.add_root((30, 30))
+
+        path = pathfinder.path_to((random.randint(0, map_width -1,), random.randint(0, map_height -1)))[:].tolist()
+
+        for i, j in path:
+            dungeon.tiles[i, j] = tile_types.road
+
+    # TODO
+    # placer huse, lav veje mellem husene
+    # optimer koden (den er MEGET langsom(mange loops, go figure))
+    # placer søer
 
     return dungeon
 

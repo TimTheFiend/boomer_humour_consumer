@@ -190,6 +190,21 @@ shallow_water = new_tile(
     ),
 )
 
+road = new_tile(
+    walkable=True,
+    transparent=True,
+    dark=(
+        ord('█'),
+        (100, 50, 10),
+        (100, 50, 10)
+    ),
+    light=(
+        ord('█'),
+        (100, 50, 10),
+        (100, 50, 10)
+    ),
+)
+
 # heights
 
 h1 = new_tile(
