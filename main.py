@@ -29,7 +29,7 @@ def temp_startup():
     map_height = DUNGEON_HEIGHT
     map_width = DUNGEON_WIDTH
     max_rooms = 1000
-    max_trees = 100000
+    tree_chance = 50
     max_rivers = 2
     room_min_size = 5
     room_max_size = 15
@@ -46,7 +46,7 @@ def temp_startup():
     engine.game_map = generate_forest(
         map_width=map_width,
         map_height=map_height,
-        max_trees=max_trees,
+        tree_chance=tree_chance,
         engine=engine,
     )
 

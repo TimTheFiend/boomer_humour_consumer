@@ -142,7 +142,7 @@ def generate_forest(
     *,
     map_width,
     map_height,
-    max_trees,
+    tree_chance, #density - %
     engine: Engine,
 ) -> GameMap:    
     player = engine.player
@@ -150,66 +150,85 @@ def generate_forest(
 
     player.place(25, 25, dungeon)
 
-    for i in range(max_trees):
 
-        x = random.randint(0, map_width -1)
-        y = random.randint(0, map_height -1)
+    x = random.randint(0, map_width -1)
+    y = random.randint(0, map_height -1)
 
-        new_tree = Tree(x, y)
+    new_tree = Tree(x, y)
 
-        dungeon.tiles[x, y] = random.choice((tile_types.tree1, tile_types.tree2))
+    for x in range(map_width):
+        for y in range(map_height):
+            if random.randint(0, 100) < tree_chance:
+                dungeon.tiles[x, y] = random.choice((tile_types.tree1, tile_types.tree2))
 
-        if random.randint(0, 100) < 25:
-            dungeon.tiles[x, y] = tile_types.leaves    
+            if random.randint(0, 100) < 25:
+                dungeon.tiles[x, y] = tile_types.leaves    
 
     # ville gøre dette til en funktion men jeg er for dum til at få det til at virke
 
 
+
+
+
+    # y = 0
+
+    noisemap = tcod.noise.Noise(
+        dimensions=2,
+        algorithm=tcod.NOISE_SIMPLEX,
+        implementation=tcod.noise.TURBULENCE,
+        hurst=0.7,
+        lacunarity=3.8,
+        octaves=4,
+    )
+
+    ogrid = [
+        np.arange(map_width, dtype=np.float32,),
+        np.arange(map_height, dtype=np.float32,),
+    ]
+
+    ogrid[0] *= 0.05
+    ogrid[1] *= 0.05
+
+    hm_height = noisemap.sample_ogrid(ogrid)
+    tcod.heightmap_normalize(hm_height, 0.0, 1.0)
+
     max_rivers = random.randint(3, 5)
     print(max_rivers)
 
-    # y = 0
     for rivers in range(max_rivers):
-        noisemap = tcod.noise.Noise(
-            dimensions=2,
-            algorithm=tcod.NOISE_SIMPLEX,
-            implementation=tcod.noise.TURBULENCE,
-            hurst=0.7,
-            lacunarity=3.8,
-            octaves=4,
-        )
-
-        ogrid = [
-            np.arange(map_width, dtype=np.float32,),
-            np.arange(map_height, dtype=np.float32,),
-        ]
-
-        ogrid[0] *= 0.05
-        ogrid[1] *= 0.05
-
-        hm_height = noisemap.sample_ogrid(ogrid)
-        tcod.heightmap_normalize(hm_height, 0.0, 1.0)
 
         temp_cost = []
         for x in range(map_width):
             temp_row = []
             for y in range(map_height):
                 tile = hm_height[x, y]
-                value = 10
+                value = 0
                 if 0.0 <= tile <= 0.1:
                     value = 1
-                if 0.1 <= tile <= 0.3:
+                if 0.1 <= tile <= 0.2:
+                    value = 2
+                if 0.2 <= tile <= 0.3:
                     value = 3
-                if 0.3 <= tile <= 0.5:
+                if 0.3 <= tile <= 0.4:
+                    value = 4
+                if 0.4 <= tile <= 0.5:
                     value = 5
-                if 0.5 <= tile <= 0.8:
+                if 0.5 <= tile <= 0.6:
+                    value = 6
+                if 0.6 <= tile <= 0.7:
                     value = 7
-
+                if 0.7 <= tile <= 0.8:
+                    value = 8
+                if 0.8 <= tile <= 0.9:
+                    value = 9
+                if 0.9 <= tile <= 1.0:
+                    value = 10
+                
                 temp_row.append(value)
             temp_cost.append(temp_row)
 
         cost = np.array(temp_cost, dtype=np.int8, order='F')
-        graph = tcod.path.SimpleGraph(cost=cost, cardinal=2, diagonal=5,)
+        graph = tcod.path.SimpleGraph(cost=cost, cardinal=2, diagonal=10,)
         
         pathfinder = tcod.path.Pathfinder(graph)
         pathfinder.add_root((0, random.randint(0, map_height -1)))
@@ -217,73 +236,9 @@ def generate_forest(
         path = pathfinder.path_to((map_width -1, random.randint(0, map_height -1)))[:].tolist()
         print(path)
         for i, j in path:
+            if dungeon.tiles[i, j] == tile_types.shallow_water:
+                break
             dungeon.tiles[i, j] = tile_types.shallow_water
-
-    # TODO
-    # stop genering af flod hvis den møder en anden flod (floder kan ikke ad)
-
-    
-    # while True:
-    #     x = random.randint(0,50)
-    #     y = random.randint(0,20)
-
-    #     if hm_height[x, y] > 0.5:
-    #         dungeon.tiles[x, y] = tile_types.shallow_water
-    #         break
-
-    # last_direction = []
-    # directions = [
-    #     (0,1),
-    #     (1,0),
-    #     (0,-1),
-    #     (-1,0)
-    # ]
-    # counter = 0
-
-    # while True:
-    #     valid = False
-    #     lowest_value = 0.3
-
-    #     for _x, _y in directions:
-    #         if hm_height[x + _x, y + _y] > lowest_value and (_x, _y) != last_direction:
-    #             current = _x, _y
-    #             lowest_value = hm_height[x + _x, y + _y]
-    #             valid = True
-
-    #     if valid == False or counter >= 100:
-    #         break
-    #     x += current[0]
-    #     y += current[1]
-    #     last_direction = (-1 * current[0], -1 * current[1])
-    #     dungeon.tiles[x, y] = tile_types.shallow_water
-    #     counter += 1
-
-
-    # for x in range(80):
-    #     for y in range(60):
-    #         tile = hm_height[x, y]
-
-    #         tile_colour = tcod.color_lerp(tcod.blue, tcod.red, tile)
-
-    #         console.print(x=x, y=y, string=' ', fg=(255, 255, 255), bg=(tile_colour))
-
-
-
-
-
-    # for river_iteration in range(max_rivers):
-    #     x = random.randint(20, map_width -21)
-
-    #     river_width = random.randint(4, 12)
-
-    #     for river_width_iteration in range(river_width):
-            
-    #         for river_height_iteration in range(map_height -1):
-    #             dungeon.tiles[x , y + river_height_iteration] = tile_types.shallow_water
-
-
-
-    # slut
 
     return dungeon
 
