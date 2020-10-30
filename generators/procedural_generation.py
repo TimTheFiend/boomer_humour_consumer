@@ -161,6 +161,27 @@ def generate_forest(
 
     # ville gøre dette til en funktion men jeg er for dum til at få det til at virke
 
+    bsp = tcod.bsp.BSP(
+        0,
+        0,
+        map_width,
+        map_height,
+    )
+
+    bsp.split_recursive(
+        depth=5,
+        min_width=45,
+        min_height=45,
+        max_horizontal_ratio=1.5,
+        max_vertical_ratio=1.5,
+    )
+
+    for node in bsp.pre_order():
+        if node.children:
+            continue
+            n_1, n_2 = node.children
+        dungeon.tiles[random.randint(node.x, node.w + node.x), random.randint(node.y, node.h + node.y)] = tile_types.door
+
     noisemap = tcod.noise.Noise(
         dimensions=2,
         algorithm=tcod.NOISE_SIMPLEX,
@@ -183,39 +204,38 @@ def generate_forest(
 
     max_rivers = random.randint(4, 6)
     max_roads = 5
-    print(max_rivers)
 
-    for rivers in range(max_rivers):
-
-        temp_cost = []
-        for x in range(map_width):
-            temp_row = []
-            for y in range(map_height):
-                tile = hm_height[x, y]
-                value = 0
-                if 0.0 <= tile <= 0.1:
-                    value = 1
-                if 0.1 <= tile <= 0.2:
-                    value = 2
-                if 0.2 <= tile <= 0.3:
-                    value = 3
-                if 0.3 <= tile <= 0.4:
-                    value = 4
-                if 0.4 <= tile <= 0.5:
-                    value = 5
-                if 0.5 <= tile <= 0.6:
-                    value = 6
-                if 0.6 <= tile <= 0.7:
-                    value = 7
-                if 0.7 <= tile <= 0.8:
-                    value = 8
-                if 0.8 <= tile <= 0.9:
-                    value = 9
-                if 0.9 <= tile <= 1.0:
-                    value = 10
-                
-                temp_row.append(value)
-            temp_cost.append(temp_row)
+    temp_cost = []
+    for x in range(map_width):
+        temp_row = []
+        for y in range(map_height):
+            tile = hm_height[x, y]
+            value = 0
+            if 0.0 <= tile <= 0.1:
+                value = 1
+            if 0.1 <= tile <= 0.2:
+                value = 2
+            if 0.2 <= tile <= 0.3:
+                value = 3
+            if 0.3 <= tile <= 0.4:
+                value = 4
+            if 0.4 <= tile <= 0.5:
+                value = 5
+            if 0.5 <= tile <= 0.6:
+                value = 6
+            if 0.6 <= tile <= 0.7:
+                value = 7
+            if 0.7 <= tile <= 0.8:
+                value = 8
+            if 0.8 <= tile <= 0.9:
+                value = 9
+            if 0.9 <= tile <= 1.0:
+                value = 10
+            
+            temp_row.append(value)
+        temp_cost.append(temp_row)
+        
+    for rivers in range(max_rivers):        
 
         cost = np.array(temp_cost, dtype=np.int8, order='F')
         graph = tcod.path.SimpleGraph(cost=cost, cardinal=2, diagonal=10,)
@@ -229,47 +249,70 @@ def generate_forest(
             if dungeon.tiles[i, j] == tile_types.shallow_water or dungeon.tiles[i, j] == tile_types.deep_water:
                 break
             dungeon.tiles[i, j] = tile_types.shallow_water
+    temp_cost = []
 
-    # TODO
-    # roads
-    # samme pathfinding som når man laver en flod, men på et tidspunkt skal tile_type tjekkes, hvis tile_type er en anden road, koster det færre point at lave en road
+    # room_min_size = 4
+    # room_max_size = 10
+    # max_rooms = 10
 
-    for roads in range(max_roads):
-        temp_cost = []
-        for x in range(map_width):
-            temp_row = []
-            for y in range(map_height):
-                tile = hm_height[x, y]
-                value = 0
-                if 0.0 <= tile <= 0.1:
-                    value = 2
-                if 0.1 <= tile <= 0.2:
-                    value = 3
-                if 0.2 <= tile <= 0.3:
-                    value = 4
-                if 0.3 <= tile <= 0.4:
-                    value = 5
-                if 0.4 <= tile <= 0.5:
-                    value = 6
-                if 0.5 <= tile <= 0.6:
-                    value = 7   
-                if 0.6 <= tile <= 0.7:
-                    value = 8
-                if 0.7 <= tile <= 0.8:
-                    value = 9
-                if 0.8 <= tile <= 0.9:
-                    value = 10
-                if 0.9 <= tile <= 1.0:
-                    value = 11
+    # door_x = 0 
+    # door_y = 0
+    # doors = []
 
-                if dungeon.tiles[x, y] == tile_types.road:
-                    value = 1
+    # for rooms in range(max_rooms):
+    #     room_width = random.randint(room_min_size, room_max_size)
+    #     room_height = random.randint(room_min_size, room_max_size)
 
-                if dungeon.tiles[x, y] == tile_types.shallow_water or dungeon.tiles[x, y] == tile_types.deep_water:
-                    value = 15
+    #     temp_door_xy = []
+        
+    #     x = random.randint(0, map_width -1)
+    #     y = random.randint(0, map_height -1)
 
-                temp_row.append(value)
-            temp_cost.append(temp_row)
+    #     temp_door_xy.append(x)
+    #     temp_door_xy.append(y)
+    #     doors.append(temp_door_xy)
+
+    #     dungeon.tiles[x, y] = tile_types.door
+
+    # print(doors)
+
+    for x in range(map_width):
+        temp_row = []
+        for y in range(map_height):
+            tile = hm_height[x, y]
+            value = 0
+            if 0.0 <= tile <= 0.1:
+                value = 2
+            if 0.1 <= tile <= 0.2:
+                value = 3
+            if 0.2 <= tile <= 0.3:
+                value = 4
+            if 0.3 <= tile <= 0.4:
+                value = 5
+            if 0.4 <= tile <= 0.5:
+                value = 6
+            if 0.5 <= tile <= 0.6:
+                value = 7   
+            if 0.6 <= tile <= 0.7:
+                value = 8
+            if 0.7 <= tile <= 0.8:
+                value = 9
+            if 0.8 <= tile <= 0.9:
+                value = 10
+            if 0.9 <= tile <= 1.0:
+                value = 11
+
+            if dungeon.tiles[x, y] == tile_types.road:
+                value = 1
+
+            if dungeon.tiles[x, y] == tile_types.shallow_water or dungeon.tiles[x, y] == tile_types.deep_water:
+                value = 15
+
+            temp_row.append(value)
+        temp_cost.append(temp_row)
+
+
+    for roads in range(10):
 
         cost = np.array(temp_cost, dtype=np.int8, order='F')
         graph = tcod.path.SimpleGraph(cost=cost, cardinal=2, diagonal=10,)
@@ -281,6 +324,7 @@ def generate_forest(
 
         for i, j in path:
             dungeon.tiles[i, j] = tile_types.road
+            temp_cost[i][j] = 1
 
     # TODO
     # placer huse, lav veje mellem husene
