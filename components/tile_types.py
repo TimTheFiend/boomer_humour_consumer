@@ -59,12 +59,12 @@ wall = new_tile(
     walkable=False,
     transparent=False,
     dark=(
-        random.choice((ord('█'), ord('@'))),
+        random.choice((ord('█'), ord(' '))),
         (255, 255, 255),
         (0, 0, 100)
     ),
     light=(
-        random.choice((ord('█'), ord('@'))),
+        random.choice((ord('█'), ord(' '))),
         (255,255,255),
         (130,110,50)
     ),

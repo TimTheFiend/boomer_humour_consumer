@@ -27,11 +27,13 @@ class River:
 
 
 class RectangularRoom:
+    door: int
     def __init__(self, x, y, width, height):
         self.x1 = x
         self.y1 = y
         self.x2 = x + width
         self.y2 = y + height
+        self.door = self.initial_door
 
     @property
     def center(self) -> Tuple[int, int]:
@@ -59,7 +61,7 @@ class RectangularRoom:
         return slice(self.x1, self.x2), slice(self.y1, self.y2)
 
     @property
-    def door(self) -> Tuple[int, int]:
+    def initial_door(self) -> Tuple[int, int]:
         x = 0
         y = 0
         if random.random() < 0.5:
@@ -145,6 +147,11 @@ def generate_forest(
     tree_chance, #density - %
     engine: Engine,
 ) -> GameMap:    
+    hub_x = random.randint(int(map_width / 3), int((map_width / 3) + (map_width / 3)))
+    hub_y = random.randint(int(map_height / 3), int((map_height / 3) + (map_height / 3)))
+
+
+    rooms: List[RectangularRoom] = []
     player = engine.player
     dungeon = GameMap(engine, map_width, map_height, entities=[player])
 
@@ -158,8 +165,6 @@ def generate_forest(
 
             if random.randint(0, 100) < int(tree_chance / 4):
                 dungeon.tiles[x, y] = tile_types.leaves    
-
-    # ville gøre dette til en funktion men jeg er for dum til at få det til at virke
 
     bsp = tcod.bsp.BSP(
         0,
@@ -176,12 +181,34 @@ def generate_forest(
         max_vertical_ratio=1.5,
     )
 
+    # using bsp to place houses
     for node in bsp.pre_order():
         if node.children:
             continue
             n_1, n_2 = node.children
-        dungeon.tiles[random.randint(node.x, node.w + node.x), random.randint(node.y, node.h + node.y)] = tile_types.door
+        
+        room_width = random.randint(5, 15)
+        room_height = random.randint(5, 15)
 
+        x = random.randint(0, dungeon.width - room_width - 1)
+        y = random.randint(0, dungeon.height - room_height - 1)
+
+        new_room = RectangularRoom(x, y, room_width, room_height)
+
+        if any(new_room.intersects(other_room) for other_room in rooms):
+            continue
+
+        dungeon.tiles[new_room.outer] = tile_types.wall
+        dungeon.tiles[new_room.inner] = tile_types.floor
+        dungeon.tiles[new_room.door] = tile_types.door     
+
+        rooms.append(new_room)
+
+        # new_room.outer
+        
+        # dungeon.tiles[random.randint(node.x, node.w + node.x), random.randint(node.y, node.h + node.y)] = tile_types.door
+
+    # generating noisemap so some tiles have different values, when a road/river is placed it will prefer some values over other values
     noisemap = tcod.noise.Noise(
         dimensions=2,
         algorithm=tcod.NOISE_SIMPLEX,
@@ -205,6 +232,7 @@ def generate_forest(
     max_rivers = random.randint(4, 6)
     max_roads = 5
 
+    # different "costs" for different values. A river will typically avoid tiles with higher values if it can
     temp_cost = []
     for x in range(map_width):
         temp_row = []
@@ -231,6 +259,9 @@ def generate_forest(
                 value = 9
             if 0.9 <= tile <= 1.0:
                 value = 10
+
+            if dungeon.tiles[x, y] == tile_types.wall or dungeon.tiles[x, y] == tile_types.floor or dungeon.tiles[x, y] == tile_types.door:
+                value = 100
             
             temp_row.append(value)
         temp_cost.append(temp_row)
@@ -243,39 +274,15 @@ def generate_forest(
         pathfinder = tcod.path.Pathfinder(graph)
         pathfinder.add_root((0, random.randint(0, map_height -1)))
 
-        # path = pathfinder.path_to((map_width -1, random.randint(0, map_height -1)))[:].tolist()
         path = pathfinder.path_to((map_width -1, random.randint(0, map_height -1)))[:].tolist()
         for i, j in path:
+            # stops placing river tiles if there already is a river on the same tile, this is to make converging rivers, and to avoid splitting rivers 
             if dungeon.tiles[i, j] == tile_types.shallow_water or dungeon.tiles[i, j] == tile_types.deep_water:
                 break
             dungeon.tiles[i, j] = tile_types.shallow_water
+
+
     temp_cost = []
-
-    # room_min_size = 4
-    # room_max_size = 10
-    # max_rooms = 10
-
-    # door_x = 0 
-    # door_y = 0
-    # doors = []
-
-    # for rooms in range(max_rooms):
-    #     room_width = random.randint(room_min_size, room_max_size)
-    #     room_height = random.randint(room_min_size, room_max_size)
-
-    #     temp_door_xy = []
-        
-    #     x = random.randint(0, map_width -1)
-    #     y = random.randint(0, map_height -1)
-
-    #     temp_door_xy.append(x)
-    #     temp_door_xy.append(y)
-    #     doors.append(temp_door_xy)
-
-    #     dungeon.tiles[x, y] = tile_types.door
-
-    # print(doors)
-
     for x in range(map_width):
         temp_row = []
         for y in range(map_height):
@@ -305,31 +312,50 @@ def generate_forest(
             if dungeon.tiles[x, y] == tile_types.road:
                 value = 1
 
+            # roads will typically avoid rivers if possible
             if dungeon.tiles[x, y] == tile_types.shallow_water or dungeon.tiles[x, y] == tile_types.deep_water:
                 value = 15
+
+            # if dungeon.tiles[x, y] == tile_types.wall or dungeon.tiles[x, y] == tile_types.floor or dungeon.tiles[x, y] == tile_types.door:
+
+            # do not under any circumstances place a road through a house
+            if dungeon.tiles[x, y] == tile_types.wall or dungeon.tiles[x, y] == tile_types.floor:
+                value = 0
+
+                
 
             temp_row.append(value)
         temp_cost.append(temp_row)
 
+    for roads in range(len(rooms) -1):
 
-    for roads in range(10):
+        # print(rooms[roads].door)
 
         cost = np.array(temp_cost, dtype=np.int8, order='F')
         graph = tcod.path.SimpleGraph(cost=cost, cardinal=2, diagonal=10,)
         
         pathfinder = tcod.path.Pathfinder(graph)
-        pathfinder.add_root((30, 30))
+        pathfinder.add_root((rooms[roads].door))
 
-        path = pathfinder.path_to((random.randint(0, map_width -1,), random.randint(0, map_height -1)))[:].tolist()
+        # path = pathfinder.path_to((random.randint(0, map_width -1,), random.randint(0, map_height -1)))[:].tolist()
 
-        for i, j in path:
+        if random.randint(0, 100) < 100:
+            path = pathfinder.path_to((hub_x, hub_y))[:].tolist()
+        else:
+            path = pathfinder.path_to((rooms[roads + 1].door))[:].tolist()
+
+
+        for i, j in path[1:-1]:
             dungeon.tiles[i, j] = tile_types.road
             temp_cost[i][j] = 1
 
     # TODO
-    # placer huse, lav veje mellem husene
-    # optimer koden (den er MEGET langsom(mange loops, go figure))
+    # placer huse, lav veje mellem husene - done
+    # optimer koden (den er MEGET langsom(mange loops, go figure)) - done
+    # lav "hub" som flere veje mødes i - nogenlunde done
     # placer søer
+    # vend døre mod hub
+    dungeon.tiles[hub_x, hub_y] = tile_types.deep_water
 
     return dungeon
 
