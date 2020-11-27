@@ -327,7 +327,7 @@ def generate_forest(
             temp_row.append(value)
         temp_cost.append(temp_row)
 
-    for roads in range(len(rooms) -1):
+    for roads in range(len(rooms)):
 
         # print(rooms[roads].door)
 
@@ -339,10 +339,17 @@ def generate_forest(
 
         # path = pathfinder.path_to((random.randint(0, map_width -1,), random.randint(0, map_height -1)))[:].tolist()
 
-        if random.randint(0, 100) < 100:
-            path = pathfinder.path_to((hub_x, hub_y))[:].tolist()
-        else:
+        road_to_door_chance = random.randint(0, 100)
+
+        if road_to_door_chance > 0 and roads != len(rooms) - 1:
             path = pathfinder.path_to((rooms[roads + 1].door))[:].tolist()
+        elif roads == len(rooms):
+            path = pathfinder.path_to((hub_x, hub_y))[:].tolist()
+
+        if path:
+            print(f"{path[0]}  {path[- 1]}")
+            pass
+
 
 
         for i, j in path[1:-1]:
@@ -355,6 +362,13 @@ def generate_forest(
     # lav "hub" som flere veje mødes i - nogenlunde done
     # placer søer
     # vend døre mod hub
+
+    # guldkorn fra reddit: træer er som regelt ikke tættere end 2 meter på hinanden, ellers ville de kæmpe om sollys
+    #   derfor: sørg for at træer ikke står op og ned af hinanden.
+    # idé: lav tilfædlige søer med cellular automata "og vælg 50% af dem (eller et andet  nummer)"
+    #   "pick some random waypoints and connect them"
+    #   "overlap the two maps"
+    #   https://www.reddit.com/r/roguelikedev/comments/6b95vc/my_forest_and_cave_algorithms_explained/
     dungeon.tiles[hub_x, hub_y] = tile_types.deep_water
 
     return dungeon

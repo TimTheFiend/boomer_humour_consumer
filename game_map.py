@@ -5,8 +5,9 @@ import random
 import numpy as np
 from tcod.console import Console
 
+
 # TODO TEMP
-from components.tile_types import floor, wall, ground
+from components.tile_types import floor, wall, ground, tree1, shallow_water
 from constants import (
     CONSOLE_WIDTH,
     CONSOLE_HEIGHT,
@@ -34,7 +35,7 @@ class GameMap:
 
         self.entities = set(entities)
 
-        self.tiles = np.full((width, height), fill_value=ground, order='F')  # TODO TEMP
+        self.tiles = np.full((width, height), fill_value=tree1, order='F')  # TODO TEMP
 
         # self.tiles = np.full((width, height), fill_value=None, order='F')
 

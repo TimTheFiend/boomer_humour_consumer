@@ -20,7 +20,9 @@ def temp_startup():
     from engine import Engine
     from game_map import GameMap
     from input_handlers import MainGameEventHandler
+    
     from generators.procedural_generation import generate_dungeon, generate_forest, place_tile
+    from generators.forest_generation_test import forest, dungeon_cellular_simple
 
     player = copy.deepcopy(entity_factories.human)
     engine = Engine(player)
@@ -36,19 +38,27 @@ def temp_startup():
 
     # engine.game_map = generate_dungeon(
     #     map_width=map_width,
-    #     map_height=map_height,
-    #     max_rooms=max_rooms,
+    #     map_height=map_height,dungeon
+    #     max_rdungeonoms=max_rooms,
     #     room_min_size=room_min_size,
     #     room_max_size=room_max_size,
     #     engine=engine,
     # )
-
-    engine.game_map = generate_forest(
+    print("start")
+    engine.game_map = forest(
         map_width=map_width,
         map_height=map_height,
-        tree_chance=tree_chance,
-        engine=engine,
+        engine=engine
     )
+    print(engine.game_map.entities)
+    print("slut")
+
+    # engine.game_map = generate_forest(
+    #     map_width=map_width,
+    #     map_height=map_height,
+    #     tree_chance=tree_chance,
+    #     engine=engine,
+    # )
 
 
     return MainGameEventHandler(engine)
