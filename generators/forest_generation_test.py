@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import random
+import time
 from copy import deepcopy
 
 from typing import Dict, Iterator, List, Tuple, TYPE_CHECKING
@@ -21,14 +22,14 @@ def dungeon_cellular_simple(dungeon, start_floor_chance=0.55, smooth_level=3):
     # dungeon = [[tile_types.tree1 for x in range(dungeon.width)] for y in range(dungeon.height)]
 
     # Randomly fill all-but-border cells by floor with start_floor_chance probability
-    for y, _ in enumerate(dungeon.tiles[1: -1]):  # Ignores the outer rows/cols
-        for x, __ in enumerate(_[1: -1]):
+    for y, _ in enumerate(dungeon.tiles):  # Ignores the outer rows/cols
+        for x, __ in enumerate(_):
             chance = random.random()
             if chance <= start_floor_chance:
                 if random.randint(0, 100) > 75:
-                    dungeon.tiles[y+1][x+1] = tile_types.ground
+                    dungeon.tiles[y][x] = tile_types.ground
                 else:
-                    dungeon.tiles[y+1][x+1] = tile_types.leaves
+                    dungeon.tiles[y][x] = tile_types.leaves
 
     # Sequentially smooth the map smooth_level times
     for _ in range(smooth_level):
@@ -86,8 +87,9 @@ def forest(
     player.place(25, 25, dungeon)
 
     print("f start")
-    dungeon = dungeon_cellular_simple(dungeon, start_floor_chance=0.55, smooth_level=3)
+    start_time = time.time()
+    dungeon = dungeon_cellular_simple(dungeon, start_floor_chance=0.55, smooth_level=1)
 
     print(len(dungeon.gamemap.entities))
-    print()
+    print(time.time()-start_time)
     return dungeon
